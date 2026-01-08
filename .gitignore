@@ -1,0 +1,17 @@
+# Ignore Compiled C++ Binaries
+build/
+bin/
+lib/
+*.o
+*.so
+
+# Ignore Python Virtual Environment (The 'venv' folder in your image)
+Quant_Research/venv/
+__pycache__/
+*.pyc
+
+# Ignore Large Data Files (The CSV in 'Quant_Research/data')
+Quant_Research/data/*.csv
+
+# Ignore VS Code Settings
+.vscode/

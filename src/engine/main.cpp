@@ -1,13 +1,16 @@
 //Author:Movazed 
-
-#include <iostream> //not using bits/stdc++ we dont want to process all the existing libraries...
+//making the engine to excute our model + allocator queues for fast bidding......
+#include <iostream> // not using bits/stdc++ we dont want to process all the existing libraries...
 #include <thread>
 #include <vector>
 #include <cstring>
-#include <atomic> // Added for thread-safe shutdown flag
+#include <atomic>   // added for thread-safe shutdown flag
+#include <deque>    // added for price history
+#include <cmath>         
 #include "core/LockFreeQueue.hpp"
 #include "core/ArenaAllocator.hpp"
 #include "engine/OrderBook.hpp"
+#include "strategies/AvellanedaStoikov.hpp"
 #include "simdjson.h" // A fast JSON parser
 
 using namespace core;
@@ -22,13 +25,29 @@ struct MarketMsg {
     size_t length;
 };
 
+// change: adding rolling volatality
+double calculate_volatility(const std::deque<double>& prices){
+    if(prices.size() < 2) return 0.0;
+    double mean = 0;
+
+    for(double p : prices) mean += p; 
+    mean /= prices.size();
+
+    double variance = 0;
+    for(double p : prices) variance += (p - mean) * (p - mean);
+    return std::sqrt(variance/prices.size());
+}
+
 //Building the Producer Network Now Thread 1...
 
 void network_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
     const char* raw_packets[] = {
         R"({"id":1, "price":100.0, "qty":10, "side":"sell"})",
-        R"({"id":2, "price":101.0, "qty":20, "side":"sell"})",
-        R"({"id":3, "price":100.0, "qty":15, "side":"buy"})",
+        R"({"id":2, "price":100.1, "qty":5,  "side":"buy"})",   // making custom vulnerabilites....
+        R"({"id":3, "price":101.5, "qty":20, "side":"sell"})", // volatility Spike
+        R"({"id":4, "price":103.0, "qty":15, "side":"buy"})",  // big Jump
+        R"({"id":5, "price":100.0, "qty":10, "side":"sell"})", // crash
+        R"({"id":6, "price":99.0,  "qty":10, "side":"buy"})",
         nullptr
     };
 
@@ -47,7 +66,7 @@ void network_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
             std::this_thread::yield();
         }
             //stimulating network latency fake delay...
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Increased slightly to see output clearly
     }
     
     // Allow a small buffer time for consumer to finish before shutting down
@@ -61,19 +80,25 @@ void strategy_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
 
     ArenaAllocator arena(1024 * 1024);
     OrderBook book(arena);
+    
+    // Initialize the new startegic logics.....
+    strategy::AvellanedaStoikov strat; 
+    std::deque<double> price_history;
+    int current_inventory = 0;
+
     simdjson::dom::parser parser;
 
-    std::cout << "[START] Engine Ready.\n";
+    std::cout << "[START] Engine Ready. Strategy Active.\n";
     
     MarketMsg msg;
     
-    // Check the global atomic flag
+    // check the global atomic flag
     while(running){
         if(queue.pop(msg)){
             simdjson::padded_string json(msg.data, msg.length);
             simdjson::dom::element doc;
-            //Json Parse AVX optimized AVX (Advanced Vector Extensions) optimized code leverages powerful SIMD ,Single Instruction,
-            //  Multiple Data instructions on Intel/AMD CPUs to perform the same operation on multiple data elements in parallel
+            // json Parse AVX optimized AVX (Advanced Vector Extensions) optimized code leverages powerful SIMD ,Single Instruction,
+            // multiple Data instructions on Intel/AMD CPUs to perform the same operation on multiple data elements in parallel
             
             if(parser.parse(json).get(doc) == simdjson::SUCCESS){ //Extract Feild
                 uint64_t id = doc["id"];
@@ -83,7 +108,28 @@ void strategy_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
 
                 Side side = (side_str == "buy") ? Side::BUY : Side::SELL; //Now we process the orders
 
+                // updating th orderbook....
                 book.add_order(id, price, qty, side);
+
+                //updating the history and inventory 
+                if (side == Side::BUY) current_inventory++;
+                else current_inventory--;
+
+                price_history.push_back(price);
+                if (price_history.size() > 50) price_history.pop_front();
+
+                // We calculate volatility from the history we just tracked
+                double vol = calculate_volatility(price_history);
+                
+                // asking the ai brain or our model to quote 
+                auto quote = strat.calculate_quote(price, current_inventory, vol);
+
+                // making logics for ai decision---->
+
+                std::cout << "[STRAT] Vol:" << vol 
+                          << " | Inv:" << current_inventory 
+                          << (quote.panic_mode ? " | [PANIC MODE]" : " | [NORMAL]")
+                          << " | Bid: " << quote.bid_price << " Ask: " << quote.ask_price << "\n";
             }
         } else {
             //using relax function to reeduce thermal throtlling on core , this instuction is critical for low latency spin loops
@@ -108,3 +154,5 @@ int main()  {
 
     return 0;
 }
+
+// now traverse to binder on engine/bindings for conversion of this module to python....

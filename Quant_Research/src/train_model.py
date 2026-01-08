@@ -58,5 +58,5 @@ if __name__ == "__main__":
 
             Reduced to 6 decimals, now we have to copy those lines with constexpr 
 
-            So by this we conclude we got the weights =)
+            So by this we conclude we got the weights =) now move to ./include/strategies/AvellanedaStoikov.hpp
     '''

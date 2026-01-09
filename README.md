@@ -273,10 +273,4 @@ Happy algorithmic trading! 🚀
 
 ---
 
-If you'd like, I can also generate:
-
-* `LICENSE` file
-* `.gitignore`
-* `requirements.txt`
-* `CONTRIBUTING.md`
 

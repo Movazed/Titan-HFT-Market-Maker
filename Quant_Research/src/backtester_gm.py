@@ -5,7 +5,6 @@ import os
 import pandas as pd
 import numpy as np
 import time
-import matplotlib.pyplot as plt # Added for graphing
 
 # Point to cpp build folder
 build_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../build"))
@@ -85,41 +84,8 @@ class Backtester:
 
         duration = time.time() - start_time
         print(f"[DONE] Processed {limit - 50} ticks in {duration:.2f}s")
-        
-        self.plot_results() # Plot the PnL graph
         self.generate_report()
             
-    def plot_results(self):
-        # Create a figure with 2 subplots (PnL and Price)
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
-        
-        # Plot 1: Cumulative PnL
-        ax1.plot(self.pnl_history, color='green', label='Strategy PnL ($)')
-        ax1.set_title('Cumulative Profit & Loss')
-        ax1.set_ylabel('PnL ($)')
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
-        
-        # Plot 2: Market Price
-        # We need to slice the dataframe to match the loop range
-        price_data = self.df['mid_price'].iloc[50:50+len(self.pnl_history)]
-        ax2.plot(price_data.values, color='black', alpha=0.6, label='Market Price')
-        ax2.set_title('Market Price Asset')
-        ax2.set_ylabel('Price')
-        ax2.legend()
-        ax2.grid(True, alpha=0.3)
-        
-        plt.tight_layout()
-        
-        # Save to models folder
-        output_dir = "../models"
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-            
-        output_path = os.path.join(output_dir, "pnl_curve.png")
-        plt.savefig(output_path)
-        print(f"\n[GRAPH] Saved results to '{output_path}'")
-
     def generate_report(self):
         print("\n" + "="*50)
         print("    Hybrid Engine BackTesting Report")
@@ -146,15 +112,11 @@ class Backtester:
 
 if __name__ == '__main__': 
     # data_path = "../data/synthetic_market_data.csv" 
-    data_path = "../data/hft_tick_data.csv" #rigged dataset or we can say bad market dataset
-    # data_path = "../data/ou_tick_data.csv" 
+    # data_path = "../data/hft_tick_data.csv" #rigged dataset or we can say bad market dataset
+    data_path = "../data/ou_tick_data.csv" 
     
     if os.path.exists(data_path):
         bt = Backtester(data_path)
         bt.run(latency_ms=200)
     else:
         print("ERROR: Data file missing. Run generate py files first....")
-
-
-#cd ~/HFT_Engine/build && make -j4 && cd ~/HFT_Engine/Quant_Research/src
-#python3 backtester.py

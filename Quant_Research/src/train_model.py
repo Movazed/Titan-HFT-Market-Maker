@@ -3,12 +3,15 @@
 
 import pandas as pd
 import numpy as np
+import json  # Added to save the brain
+import os    # Added to handle file paths
 from sklearn.linear_model import LogisticRegression # we will be using Logictic Regression cuz it uses heat maps or boolean values to be precise YES/NO... gng
 from sklearn.metrics import classification_report
 
 def train():
     print("[ML] Loading all the rows .... ") # first we load the data from synthetic market data...
     try:
+        # We can switch this to use the tougher data if we want a smarter model
         df = pd.read_csv("../data/synthetic_market_data.csv")
     except FileNotFoundError:
         print("ERROR: Data file not found. Run market_sim.py first.")
@@ -21,6 +24,7 @@ def train():
     df['rolling_vol'] = df['returns'].rolling(window=50).std()
 
     # FIX: Create the 'target' column (The Answer Key)
+    # We define "High Risk" as vol > 0.1 (or whatever threshold matches the data)
     df['target'] = (df['true_volatility'] > 0.1).astype(int)
 
     # now we are dropping first 50 rows...
@@ -44,7 +48,27 @@ def train():
     print(f"constexpr static double MODEL_BIAS = {intercept:.6f};")
     print(f"constexpr static double MODEL_WEIGHT = {coef:.6f};")
     print("="*50 + "\n")
+
+    # --- SAVE TO MODELS FOLDER ---
+    # This gives your 'models' folder a purpose.
+    model_data = {
+        "model_bias": intercept,
+        "model_weight": coef,
+        "trained_on": "synthetic_market_data.csv",
+        "timestamp": pd.Timestamp.now().isoformat()
+    }
+
+    output_dir = "../models"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    output_path = os.path.join(output_dir, "latest_model.json")
     
+    with open(output_path, "w") as f:
+        json.dump(model_data, f, indent=4)
+    
+    print(f"[SUCCESS] Model saved to {output_path}")
+
 if __name__ == "__main__":
     train()
 
@@ -60,3 +84,5 @@ if __name__ == "__main__":
 
             So by this we conclude we got the weights =) now move to ./include/strategies/AvellanedaStoikov.hpp
     '''
+
+# source ~/HFT_Engine/Quant_Research/venv/bin/activate activation of env

@@ -56,9 +56,12 @@ if __name__ == "__main__":
     df_combined = pd.concat([df_low, df_high]).reset_index(drop=True)
 
     #saving csv
+    
     output_path = "../data/synthetic_market_data.csv"
     df_combined.to_csv(output_path, index=False)
     print(f"[SIM] Data saved to {output_path}")
 
 
 #move to market_sim -> train_model for training script......
+
+# source ~/HFT_Engine/Quant_Research/venv/bin/activate activation of env

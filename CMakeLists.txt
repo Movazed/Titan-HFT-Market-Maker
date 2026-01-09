@@ -48,3 +48,5 @@ pybind11_add_module(hft_core
 )
 
 # the strategy logic in bindings.cpp is pure math, so it doesn't need simdjson.
+
+# source ~/HFT_Engine/Quant_Research/venv/bin/activate activation of env

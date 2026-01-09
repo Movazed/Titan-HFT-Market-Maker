@@ -1,18 +1,3 @@
-Perfect — here is a **clean, fully valid Markdown README.md** that will render correctly on GitHub, GitLab, VSCode, and all Markdown viewers.
-
-This version fixes:
-
-* Broken code fences
-* Mixed `text` blocks
-* Invalid tables
-* Incorrect headers
-* Escaped characters
-* Rendering issues
-
-You can **paste this directly into `README.md` and push it**.
-
----
-
 # 🚀 Hybrid HFT Engine (C++ & Python)
 
 **High-Frequency Trading System with ML-Powered Market Making Strategies**

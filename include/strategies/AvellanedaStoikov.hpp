@@ -35,7 +35,7 @@ class AvellanedaStoikov {
     public:
         // Constructor: Automatically attempts to load the latest brain from Python
         AvellanedaStoikov() {
-            load_model("../models/latest_model.json");
+            load_model("/home/arya6/HFT_Engine/Quant_Research/models/latest_model.json");
         }
 
         // Simple JSON Parser (No external libraries required)

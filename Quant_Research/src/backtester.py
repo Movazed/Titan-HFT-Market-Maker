@@ -90,18 +90,18 @@ class Backtester:
         self.generate_report()
             
     def plot_results(self):
-        # Create a figure with 2 subplots (PnL and Price)
+        # create a figure with 2 subplots (PnL and Price)
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
         
-        # Plot 1: Cumulative PnL
+        # plot 1: Cumulative PnL
         ax1.plot(self.pnl_history, color='green', label='Strategy PnL ($)')
         ax1.set_title('Cumulative Profit & Loss')
         ax1.set_ylabel('PnL ($)')
         ax1.legend()
         ax1.grid(True, alpha=0.3)
         
-        # Plot 2: Market Price
-        # We need to slice the dataframe to match the loop range
+        # plot 2: Market Price
+        # we need to slice the dataframe to match the loop range
         price_data = self.df['mid_price'].iloc[50:50+len(self.pnl_history)]
         ax2.plot(price_data.values, color='black', alpha=0.6, label='Market Price')
         ax2.set_title('Market Price Asset')

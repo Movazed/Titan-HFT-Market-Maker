@@ -50,7 +50,7 @@ public:
 
         }
         [[nodiscard]] bool pop(T& val) noexcept {
-            // FIXED: Changed 'current_tail' to 'current_head'
+            // changed 'current_tail' to 'current_head'
             const size_t current_head = head_.load(std::memory_order_relaxed);
             //check for empty
 

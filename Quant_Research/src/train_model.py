@@ -23,7 +23,7 @@ def train():
     # FIX: Calculate the actual rolling volatility (Standard Deviation)
     df['rolling_vol'] = df['returns'].rolling(window=50).std()
 
-    # FIX: Create the 'target' column (The Answer Key)
+    # create the 'target' column (The Answer Key)
     # We define "High Risk" as vol > 0.1 (or whatever threshold matches the data)
     df['target'] = (df['true_volatility'] > 0.1).astype(int)
 

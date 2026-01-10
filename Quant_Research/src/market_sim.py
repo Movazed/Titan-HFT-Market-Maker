@@ -14,7 +14,7 @@ class Market_Simulator:
         ''' Now we are simulating a price path.. which return dataframe with timestamp,and mid price'''
         np.random.seed(seed)
 
-        #Use wiener process for random shocks and std normal distribution
+        # use wiener process for random shocks and std normal distribution
         shocks = np.random.normal(0, np.sqrt(self.dt), num_ticks)
         # calc path price GBM 
         # formula: P_t = P_{t-1} * exp((mu - 0.5*sigma^2)*dt + sigma*dW)
@@ -22,7 +22,7 @@ class Market_Simulator:
         drift_comp = (self.mu - 0.5 * self.sigma ** 2) * self.dt
         diffusion_comp = self.sigma * shocks
         
-        #vectorized accumulation which has cumiliative prod which is faster than loops
+        # vectorized accumulation which has cumiliative prod which is faster than loops
 
         daily_returns = np.exp(drift_comp + diffusion_comp)
         price_path = self.start_price * np.cumprod(daily_returns)

@@ -48,9 +48,6 @@ struct MarketMsg {
     size_t length;
 };
 
-// now adding paper trading wallet
-
-
 // change: adding rolling volatality
 double calculate_volatility(const std::deque<double>& prices) {
     if (prices.size() < 2) return 0.0;
@@ -93,10 +90,12 @@ void network_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
         net::connect(beast::get_lowest_layer(ws), results);
         
         //ssl handshake
+        // FIXED: Commented out to prevent compilation error on older Boost versions
         // beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
         ws.next_layer().handshake(ssl::stream_base::client);
         
         //websockets handshake
+        // FIXED: Commented out to prevent compilation error on older Boost versions
         // beast::get_lowest_layer(ws).expires_never();
         ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
 
@@ -108,7 +107,7 @@ void network_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
         while(running){
             ws.read(buffer); // read a message into buffer
             //convert to string to copy (simdjson requires padding later...)
-
+            // FIXED: buffer_to_string -> buffers_to_string
             std::string msg_str = beast::buffers_to_string(buffer.data());
 
             MarketMsg msg; //cap length to avoid buffer overflow
@@ -163,7 +162,7 @@ void strategy_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
     ArenaAllocator arena(1024 * 1024);
     OrderBook book(arena);
 
-    // initialize the new startegic logics.....
+    // Initialize the new startegic logics.....
     strategy::AvellanedaStoikov strat;
 
     std::deque<double> price_history;
@@ -241,7 +240,7 @@ void strategy_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
                          std::cout << "[LIVE] BTC: " << price << " | Latency: " << ns << " ns\n"; //printing periodically to save the logs of IO
                     }
                 } catch (...) {
-                    // ignore malformed packets (like ping/pong)
+                    // Ignore malformed packets (like ping/pong)
                 }
 
                 // uint64_t id = doc["id"];
@@ -331,6 +330,6 @@ int main() {
     return 0;
 }
 
-// hwo to compile : g++ src/engine/main.cpp simdjson.cpp -o hft_live -O3 -march=native -pthread -I./include -I./src -lssl -lcrypto -lboost_system -Wno-interference-size
-//./hft_engine  -> this wil run the old one
+// hwo to compile : g++ src/engine/main.cpp simdjson.cpp -o hft_engine -O3 -march=native -pthread -I./include -I./src -lssl -lcrypto -lboost_system -Wno-interference-size
+//./hft_engine
 //./hft_live ->this for the new one after compiling

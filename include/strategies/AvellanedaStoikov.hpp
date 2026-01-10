@@ -108,7 +108,7 @@ class AvellanedaStoikov {
             // If Vol is 0.00004 (Storm), Spread = ~8.00
             // If Vol is 0.00010 (Crash), Spread = ~20.00
             
-            double calculated_spread = current_volatility * 200000.0;
+            double calculated_spread = current_volatility * 200000.0; //wanna play safe use 200k
             
             // Floor the spread at 2.0 so we don't quote 0.0 in dead markets
             double spread = std::max(2.0, calculated_spread);

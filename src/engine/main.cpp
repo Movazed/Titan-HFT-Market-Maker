@@ -80,8 +80,6 @@ void network_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
     try{
         std::cout << "[NET] Initializing Secure Connection to Binance...\n"; // we use io context which is required for all I/O
         net::io_context ioc;                            // the context is required for all I/o;
-        
-        // FIXED: tslv12 -> tlsv12
         ssl::context ctx{ssl::context::tlsv12_client};  
         ctx.set_verify_mode(ssl::verify_none);          // speed over strict verification...
         tcp::resolver resolver{ioc};                    //resolve domain..
@@ -90,12 +88,10 @@ void network_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
         net::connect(beast::get_lowest_layer(ws), results);
         
         //ssl handshake
-        // FIXED: Commented out to prevent compilation error on older Boost versions
         // beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
         ws.next_layer().handshake(ssl::stream_base::client);
         
         //websockets handshake
-        // FIXED: Commented out to prevent compilation error on older Boost versions
         // beast::get_lowest_layer(ws).expires_never();
         ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
 
@@ -220,7 +216,7 @@ void strategy_thread(LockFreeQueue<MarketMsg, 1024>& queue) {
 
                     double vol  = calculate_volatility(price_history); //we calcualte the volatility..
 
-                    // FIXED: 'ask' -> 'auto'
+                    // 'ask' -> 'auto'
                     auto quote = strat.calculate_quote(price, current_inventory, vol); // asking our ML model to quote....
 
                     auto end_time = std::chrono::high_resolution_clock::now();

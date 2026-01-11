@@ -108,7 +108,7 @@ class AvellanedaStoikov {
             // If Vol is 0.00004 (Storm), Spread = ~8.00
             // If Vol is 0.00010 (Crash), Spread = ~20.00
             
-            double calculated_spread = current_volatility * 200000.0; //wanna play safe use 200k
+            double calculated_spread = current_volatility * 200000.0; //wanna play safe use 200k 
             
             // Floor the spread at 2.0 so we don't quote 0.0 in dead markets
             double spread = std::max(2.0, calculated_spread);
@@ -142,3 +142,5 @@ class AvellanedaStoikov {
 // Edit 15 : Dynamic Defense. Replaced static spread with (Vol * 200,000) to survive toxic flow. 
 // we made a profit of 21,434.01 on bad market using the good market ALgorithm  less goooooooo
 // Edit 16 : Brain Transplant. Removed constexpr. Engine now loads 'latest_model.json' from Python automatically.
+
+// we are going to now make it play on live market.....

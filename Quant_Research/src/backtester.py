@@ -25,7 +25,7 @@ class Backtester:
         print(f"[BACKTEST] Loading data from {data_path}...")
         self.df = pd.read_csv(data_path)
         
-        # FIX: The new generator saves as 'price', but we need 'mid_price'
+        # the new generator saves as 'price', but we need 'mid_price'
         if 'price' in self.df.columns:
             self.df.rename(columns={'price': 'mid_price'}, inplace=True)
         
@@ -47,7 +47,7 @@ class Backtester:
         self.df['rolling_vol'] = self.df['returns'].rolling(window=50).std().fillna(0)
         
         # simulation Loop (Limit to 100k ticks for speed)
-        # Ensure we don't go out of bounds with the lookahead
+        # ensure we don't go out of bounds with the lookahead
         lookahead = 2 # representing the "200ms" latency as 2 ticks
         limit = min(len(self.df) - lookahead - 1, 100000)
         
@@ -111,7 +111,7 @@ class Backtester:
         
         plt.tight_layout()
         
-        # Save to models folder
+        # save to models folder
         output_dir = "../models"
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -134,7 +134,7 @@ class Backtester:
         print(f"Total Trades:            {self.trade_count}")
         print(f"Final Inventory:         {self.inventory}")
         
-        # FIX: Handle division by zero for Sharpe Ratio
+        # handle division by zero for Sharpe Ratio
         std_pnl = np.std(self.pnl_history)
         if std_pnl > 0 and len(self.pnl_history) > 0:
             sharpe = np.mean(self.pnl_history) / std_pnl

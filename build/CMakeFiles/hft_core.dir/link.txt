@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -O3 -march=native -pthread -Wall -flto -shared  -o hft_core.cpython-312-x86_64-linux-gnu.so CMakeFiles/hft_core.dir/src/bindings.cpp.o 
